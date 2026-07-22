@@ -1,22 +1,12 @@
 /*
   Editable global theme layer.
 
-  Safe for UI editors / AI tools:
-  - Full site background
-  - Global text color
-  - Editable-only typography
-  - Selection color
-  - Scrollbar feel
-  - Article body typography accents
-
-  Do not add data fetching, scripts, or route logic here.
+  Warm editorial palette adapted from the reference. Fonts, tokens, and motion
+  utilities live here; per-page palette + component treatment lives in
+  design-contract.ts. Do not add data fetching or routing logic here.
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-
-/* Per-task display + body typefaces (consumed via task-themes.ts). */
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@400;500;600;700;800&family=Syne:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,400;1,7..72,500&family=Geist:wght@300;400;500;600;700&display=swap');
 
 body {
   background-color: var(--slot4-page-bg) !important;
@@ -25,28 +15,26 @@ body {
 }
 
 .editable-site-root {
-  /* Yelp-style clean sans, used for both display and body. */
-  --editable-font-display: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
-  --editable-font-body: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
-  /* Premium easing curve used across every hover + transition. */
+  /* Reference-driven premium serif display + geometric sans body. */
+  --editable-font-display: 'Literata', 'Iowan Old Style', 'Georgia', 'Times New Roman', serif;
+  --editable-font-body: 'Geist', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  /* Premium easing tuned to the reference's soft-decel feel. */
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 240ms;
+  --duration-medium: 360ms;
+  --duration-slow: 560ms;
   font-family: var(--editable-font-body);
+  font-feature-settings: 'ss01', 'ss02', 'cv01';
+  letter-spacing: -0.01em;
 }
 
-/*
-  Site-wide premium motion.
-
-  1. Unify the easing of every existing transition/hover to one refined curve.
-  2. Add a smooth "post open" entry animation that replays on each navigation
-     (driven by EditablePageMotion remounting the content per route).
-  Durations stay defined per-component via Tailwind utilities.
-*/
 .editable-site-root *,
 .editable-site-root *::before,
 .editable-site-root *::after {
   transition-timing-function: var(--ease-premium);
 }
 
+/* ---------------- entry animation on route mount ---------------- */
 @keyframes editable-enter {
   from {
     opacity: 0;
@@ -58,16 +46,65 @@ body {
   }
 }
 
-/* The content region rises + fades on open; `backwards` clears the transform
-   afterwards so sticky sidebars keep working. */
 .editable-enter > * {
   animation: editable-enter 0.6s var(--ease-premium) backwards;
   will-change: transform, opacity;
 }
 
+/* ---------------- scroll-linked reveal used by EditableReveal ---------------- */
+@keyframes editable-reveal-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+.editable-reveal {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.editable-reveal.is-hydrated {
+  transform: translate3d(0, 28px, 0);
+}
+
+.editable-reveal.is-visible {
+  animation: editable-reveal-in 0.9s var(--ease-premium) both;
+  animation-delay: var(--editable-reveal-delay, 0ms);
+}
+
+/* ---------------- marquee used by home collections rail ---------------- */
+@keyframes editable-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+.editable-marquee-track {
+  animation: editable-marquee 42s linear infinite;
+  will-change: transform;
+}
+
+.editable-marquee-track:hover {
+  animation-play-state: paused;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .editable-enter > * {
-    animation: none;
+  .editable-enter > *,
+  .editable-reveal,
+  .editable-marquee-track {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  .editable-reveal.is-hydrated {
+    transform: none !important;
   }
   .editable-site-root *,
   .editable-site-root *::before,
@@ -83,7 +120,8 @@ body {
 .editable-site-root h4,
 .editable-display {
   font-family: var(--editable-font-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  font-feature-settings: 'ss01', 'ss02';
 }
 
 .editable-site-root p,
@@ -97,27 +135,64 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--slot4-accent-fill) 28%, transparent);
+  background: color-mix(in oklab, var(--slot4-accent-fill) 32%, transparent);
   color: var(--slot4-page-text);
 }
 
 ::-webkit-scrollbar-track {
-  background: color-mix(in oklab, var(--slot4-page-bg) 88%, black);
+  background: color-mix(in oklab, var(--slot4-page-bg) 92%, black);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in oklab, var(--slot4-accent) 45%, transparent);
+  background: color-mix(in oklab, var(--slot4-accent) 60%, transparent);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in oklab, var(--slot4-accent) 68%, transparent);
+  background: color-mix(in oklab, var(--slot4-accent) 80%, transparent);
 }
 
 .article-content h2 {
   color: var(--slot4-accent);
+  font-family: var(--editable-font-display);
+}
+
+.article-content h2,
+.article-content h3 {
+  font-family: var(--editable-font-display);
+  letter-spacing: -0.02em;
 }
 
 .article-content a {
   color: var(--slot4-accent-fill);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.article-content p {
+  line-height: 1.7;
+  margin-bottom: 1.15em;
+}
+
+/* Reference-style hover: content shifts up as the underline slides in. */
+.editable-link-underline {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.editable-link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-medium) var(--ease-premium);
+}
+.editable-link-underline:hover::after {
+  transform: scaleX(1);
 }
