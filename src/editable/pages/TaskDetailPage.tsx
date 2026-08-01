@@ -471,30 +471,6 @@ function BookmarkDetail({
           </article>
 
           <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
-            <EditableReveal>
-              <div className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-surface)] p-7">
-                <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[var(--tk-muted)]">
-                  The resource
-                </p>
-                <p className="editable-display mt-3 text-[22px] font-medium leading-[1.15] tracking-[-0.02em] text-[var(--tk-text)]">
-                  {post.title}
-                </p>
-                <p className="mt-2 truncate text-[13px] text-[var(--tk-muted)]">
-                  {domain || 'External resource'}
-                </p>
-                {website ? (
-                  <a
-                    href={website}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow"
-                    className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--tk-accent)] px-5 py-3 text-sm font-medium text-[var(--tk-on-accent)] transition duration-[var(--editable-duration-medium)] hover:-translate-y-[1px]"
-                  >
-                    Visit resource <ExternalLink className="h-4 w-4" />
-                  </a>
-                ) : null}
-              </div>
-            </EditableReveal>
-
             <EditableReveal index={1}>
               <div className="rounded-[var(--tk-radius)] border border-[var(--tk-line)] bg-[var(--tk-bg)] p-7">
                 <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[var(--tk-muted)]">
